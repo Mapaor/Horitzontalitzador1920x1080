@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 Rectangle {
     Layout.fillWidth: true
-    color: "#000000"
+    color: "#ffffff"
     radius: 12
     border.color: "#b9b9b9"
     border.width: 1
