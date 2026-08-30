@@ -24,6 +24,15 @@ class VideoConverter(QObject):
     progressUpdated = Signal(float)
     
     previewFinished = Signal(bool, str, str) # success, message, image_path
+    videoInfoLoaded = Signal(str, str) # videoPath, info_string
+
+    @Slot(str, result=str)
+    def get_video_info(self, input_path: str) -> str:
+        input_path = _clean_path(input_path)
+        if not input_path:
+            return ""
+        from utils import get_video_info as _get_info
+        return _get_info(input_path)
 
     @Slot(str, str, str, int, float, str, bool, str, int, str, bool, str)
     def convert(
@@ -117,7 +126,7 @@ class VideoConverter(QObject):
             if process.returncode != 0:
                 raise RuntimeError("FFmpeg ha retornat un error.")
 
-            self.conversionFinished.emit(True, f"Vídeo desat a:\n\n{output_path}")
+            self.conversionFinished.emit(True, f"Vídeo desat a: {output_path}")
 
         except Exception as e:
             self.conversionFinished.emit(False, str(e))
