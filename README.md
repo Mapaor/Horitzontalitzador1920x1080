@@ -43,6 +43,8 @@ A dins de `.vscode/settings.json` i `.vscode/launch.json` hi ha una configuraci�
 ## Desenvolupament
 Desenvolupa l'aplicació al teu gust, simplement anar fent  canvis i executant `main.py` per veure'ls.
 
+Nota: L'activació de l'entorn virtual l'hauràs de fer cada vegada que obris l'IDE (`.\.venv\Scripts\Activate.ps1`).
+
 ## Generar l'executable
 
 Primer cal afegir pyinstaller al path de MyApp.spec.
