@@ -9,7 +9,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # pyrefly: ignore [missing-import]
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont
 # pyrefly: ignore [missing-import]
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -30,6 +30,18 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     app = QGuiApplication(sys.argv)
+    
+    if hasattr(sys, "_MEIPASS"):
+        app_root = Path(sys._MEIPASS)
+    else:
+        app_root = PROJECT_ROOT
+        
+    font_path = str(app_root / "fonts" / "Bw3Cat" / "Bw3Cat-Regular.ttf")
+    font_id = QFontDatabase.addApplicationFont(font_path)
+    if font_id != -1:
+        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+        app.setFont(QFont(font_family))
+        
     engine = QQmlApplicationEngine()
     add_qml_import_path(engine)
     
