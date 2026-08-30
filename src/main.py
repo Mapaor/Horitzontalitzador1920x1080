@@ -9,7 +9,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # pyrefly: ignore [missing-import]
-from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QIcon
 # pyrefly: ignore [missing-import]
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -24,7 +24,6 @@ QML_ENTRY = "Main"
 if __name__ == "__main__":
     try:
         ffmpeg_version = check_ffmpeg()
-        print(ffmpeg_version)
     except (FileNotFoundError, RuntimeError) as error:
         print(f"FFmpeg setup error: {error}", file=sys.stderr)
         raise SystemExit(1)
@@ -33,9 +32,12 @@ if __name__ == "__main__":
     
     if hasattr(sys, "_MEIPASS"):
         app_root = Path(sys._MEIPASS)
+        icon_path = str(app_root / "qml" / "MyApp" / "assets" / "appIcon.svg")
     else:
         app_root = PROJECT_ROOT
+        icon_path = str(app_root / "src" / "qml" / "MyApp" / "assets" / "appIcon.svg")
         
+    app.setWindowIcon(QIcon(icon_path))
     font_path = str(app_root / "fonts" / "Bw3Cat" / "Bw3Cat-Regular.ttf")
     font_id = QFontDatabase.addApplicationFont(font_path)
     if font_id != -1:
