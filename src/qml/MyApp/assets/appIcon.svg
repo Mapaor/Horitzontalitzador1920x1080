@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="512"
+     height="512"
+     viewBox="0 0 512 512">
+
+  <!-- Fons -->
+  <rect
+    x="48"
+    y="48"
+    width="416"
+    height="416"
+    rx="55"
+    fill="#e9456c"
+  />
+
+  <!-- Barra horitzontal -->
+  <rect
+    x="142"
+    y="231"
+    width="228"
+    height="50"
+    rx="25"
+    fill="#ffffff"
+  />
+
+  <!-- Barra vertical esquerra -->
+  <rect
+    x="142"
+    y="191"
+    width="50"
+    height="130"
+    rx="25"
+    fill="#ffffff"
+  />
+
+  <!-- Barra vertical dreta -->
+  <rect
+    x="320"
+    y="191"
+    width="50"
+    height="130"
+    rx="25"
+    fill="#ffffff"
+  />
+
+</svg>
