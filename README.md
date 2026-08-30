@@ -6,11 +6,14 @@ Una app feta amb PySide6 (Python i Qt6) que desplega una UI moderna per utilitza
 <details><summary>Més captures</summary>
 
 
+<img width="1918" height="996" alt="imagen" src="https://github.com/user-attachments/assets/09d4bf86-8ee8-4d80-bbf1-4b7d3e29fe7a" />
 
 <img width="529" height="451" alt="h-captura-2" src="https://github.com/user-attachments/assets/f08241bd-827b-42fb-9858-17e087388431" />
 <img width="945" height="481" alt="h-captura-3" src="https://github.com/user-attachments/assets/f5694712-ff92-49f3-887e-fce1dffa19f9" />
 <img width="959" height="505" alt="h-captura-5" src="https://github.com/user-attachments/assets/0f0d7619-a56d-46a0-8e06-e802cb880232" />
 </details>
+
+
 ## Estructura
 
 - `src/main.py` — Des d'on s'executa la app
