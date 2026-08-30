@@ -8,7 +8,7 @@ Window {
     width: 800
     height: 600
     visible: true
-    title: "Vertical Blur Background"
+    title: "Horitzontalitzador3Cat"
     color: "#e0e0e0"
 
     property bool isPreviewing: false

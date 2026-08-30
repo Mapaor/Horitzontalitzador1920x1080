@@ -4,7 +4,7 @@ from pathlib import Path
 # Projecte
 # =====================================
 
-APP_NAME = "Vertical Blur Background"
+APP_NAME = "Horitzontalitzador3Cat"
 APP_VERSION = "1.0.0"
 
 # =====================================
