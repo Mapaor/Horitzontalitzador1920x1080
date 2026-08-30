@@ -57,7 +57,7 @@ I ara generem l'executable fent...
 pyinstaller .\pyinstaller\MyApp.spec --noconfirm
 ```
 
-El `.exe` es generarà dins de la carpeta `dist/`.
+El `.exe` es generarà dins de la carpeta `dist/`, es dirà `MyApp.exe` però li pots canviar el nom sense problemes.
 
 ## Llicència
 
