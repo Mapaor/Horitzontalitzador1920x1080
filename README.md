@@ -1,54 +1,64 @@
-# PySide6 + QML App Template
+# Horitzontalitzador 1920x1080
 
-Minimal starter template for building a PySide6 QML desktop app and packaging it into a Windows executable with PyInstaller.
+Una app feta amb PySide6 (Python i Qt6) que desplega una UI moderna per utilitzar ffmpeg internament amb l'objectiu de manipular vídeos (per exemple verticals gravats amb un mòbil) per horitzontalitzar-los en FullHD 16:9 amb el fons desenfocat.
 
-## Structure
+## Estructura
 
-- `src/main.py` — application entry point
-- `src/qml/` — QML modules and files
-- `pyinstaller/` — PyInstaller spec and runtime helpers
-- `requirements.txt` — Python dependencies for this project
-- `README.md` — project notes
-- `.gitignore` — excludes local environment and generated build output
+- `src/main.py` — Des d'on s'executa la app
+- `src/qml/` — Mòduls i components QML
+- `pyinstaller/` — Fitxers de configuració relacionats amb PyInstaller i runtime helpers per aconseguir generar l'executable
+- `requirements.txt` — Dependències Python que cal instal·lar
+- `fonts/` hi ha la tipografia utilitzada (en aquest cas la de 3Cat)
+- `ffmpeg/` hi ha els binaris ffmpeg.exe i ffprobe.exe
 
-Do not commit generated folders such as `build/` or `dist/`.
+Important mantenir en el gitignore les carpetes `build/` i `dist/` i l'entorn virtual de python `.venv/`.
 
-## Setup
+## Requisits
+Un IDE (per exemple VSCode), python 3.10 o superior i pip. 
 
+Tenir PowerShell a la terminal serà útil per assegurar que funcionen els següents comandaments.
+
+També recomanaria les extensions del VsCode "QT Core", "QT QML" i "QT Python".
+
+## Preparació
+
+A una terminal fer:
 ```powershell
 python -m venv .venv
+```
+```powershell
 .\.venv\Scripts\Activate.ps1
+```
+```powershell
 python -m pip install --upgrade pip
+```
+```powershell
 pip install -r requirements.txt
 ```
 
-Also select the corresponding python interpreter in your IDE. On VSCode: Ctrl+Shift+P > Python: Select Interpreter: venv.
+I també seleccionar l'entorn virtual com a Python Interpeter en el IDE que sigui que utilitzes. En el VSCode: Ctrl+Shift+P > Python: Select Interpreter: venv.
 
-For the default Run code button in VS Code to use the project virtual environment, keep the workspace interpreter selected and use the repo's `.vscode/settings.json` configuration so Code Runner executes `$pythonPath -u $fullFileName` instead of the system Python.
+A dins de `.vscode/settings.json` i `.vscode/launch.json` hi ha una configuració per permetre executar la app clicant el botó "Run" que apareix a dalt a la dreta d'el fitxer python `main.py`.
 
-Recommended VSCode Extensions: QT Core, QT Python and QT QML.
+## Desenvolupament
+Desenvolupa l'aplicació al teu gust, simplement anar fent  canvis i executant `main.py` per veure'ls.
 
-## Develop
-Develop as you wish, run `main.py` to see the application running.
+## Generar l'executable
 
-## Build the executable
-
-First add pyinstaller to the path of MyApp.spec.
+Primer cal afegir pyinstaller al path de MyApp.spec.
 ```powershell
 python -m PyInstaller .\pyinstaller\MyApp.spec --noconfirm
 ```
 
-Then build the executable.
+I ara generem l'executable fent...
 ```powershell
 pyinstaller .\pyinstaller\MyApp.spec --noconfirm
 ```
 
-The built app will be created under `dist/`.
+El `.exe` es generarà dins de la carpeta `dist/`.
 
-## External assets
+## Llicència
 
-The repository-level `ffmpeg/` directory must contain `ffmpeg.exe` and `ffprobe.exe`.
-The app resolves these files from the repository root in development and from
-PyInstaller's temporary extraction directory in a bundled build. The PyInstaller
-spec includes the directory in `dist/` and the app checks that FFmpeg can start
-before opening the UI.
+[MIT](/LICENSE)
+
+El codi de la aplicació PySide6 té llicència MIT (permissiva), els binaris de ffmpeg tenen una llicència també permisiva (LGPL 2.1), la font BW3Cat té la seva respectiva llicència propietària.
