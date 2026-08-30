@@ -9,6 +9,7 @@ except NameError:
 ENTRY = ROOT / 'src' / 'main.py'
 QML_SOURCE = ROOT / 'src' / 'qml'
 FFMPEG_SOURCE = ROOT / 'ffmpeg'
+FONTS_SOURCE = ROOT / 'fonts'
 HOOK = ROOT / 'pyinstaller' / 'hook-qml.py'
 
 if not ENTRY.exists():
@@ -25,6 +26,7 @@ a = Analysis(
     datas=[
         (str(QML_SOURCE), 'qml'),
         (str(FFMPEG_SOURCE), 'ffmpeg'),
+        (str(FONTS_SOURCE), 'fonts'),
     ],
     hiddenimports=[],
     hookspath=[],
