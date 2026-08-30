@@ -96,7 +96,7 @@ Rectangle {
                     to: 50
                     stepSize: 5
                     snapMode: Slider.SnapAlways
-                    value: 15
+                    value: 10
 
                     background: Rectangle {
                         x: darknessControl.leftPadding
