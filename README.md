@@ -1,7 +1,16 @@
 # Horitzontalitzador 1920x1080
 
 Una app feta amb PySide6 (Python i Qt6) que desplega una UI moderna per utilitzar ffmpeg internament amb l'objectiu de manipular vídeos (per exemple verticals gravats amb un mòbil) per horitzontalitzar-los en FullHD 16:9 amb el fons desenfocat.
+<img width="959" height="505" alt="horitzontalitzador-captura-1" src="https://github.com/user-attachments/assets/4dc24452-156e-43d4-82e8-118d0102b85a" />
 
+<details><summary>Més captures</summary>
+
+
+
+<img width="529" height="451" alt="h-captura-2" src="https://github.com/user-attachments/assets/f08241bd-827b-42fb-9858-17e087388431" />
+<img width="945" height="481" alt="h-captura-3" src="https://github.com/user-attachments/assets/f5694712-ff92-49f3-887e-fce1dffa19f9" />
+<img width="959" height="505" alt="h-captura-5" src="https://github.com/user-attachments/assets/0f0d7619-a56d-46a0-8e06-e802cb880232" />
+</details>
 ## Estructura
 
 - `src/main.py` — Des d'on s'executa la app
