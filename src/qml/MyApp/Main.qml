@@ -69,9 +69,9 @@ Window {
             onOpenConfig: extra => {
                 if (extra === "Marc")
                     appPopups.openFramePopup();
-                else if (extra === "Overlay")
+                else if (extra === "PNG Overlay")
                     appPopups.openOverlayPopup();
-                else if (extra === "Fons animat")
+                else if (extra === "Video Overlay")
                     appPopups.openAnimatedBgPopup(mainWindow.videoPath);
             }
         }

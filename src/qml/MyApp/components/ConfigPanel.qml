@@ -154,7 +154,7 @@ Rectangle {
                 spacing: 8
                 Layout.fillWidth: true
                 Text {
-                    text: "Extres"
+                    text: "Mode"
                     color: "#969798"
                     font.pixelSize: 12
                 }
@@ -164,7 +164,7 @@ Rectangle {
                     SegmentedControl {
                         id: extrasControl
                         Layout.fillWidth: true
-                        model: ["Cap", "Marc", "Overlay", "Fons animat"]
+                        model: ["Normal", "Marc", "PNG Overlay", "Video Overlay"]
                         currentIndex: 0
                     }
                     Button {
@@ -172,7 +172,7 @@ Rectangle {
                         icon.color: enabled ? "#ffffff" : "#969798"
                         icon.width: 18
                         icon.height: 18
-                        enabled: extrasControl.currentText !== "Cap"
+                        enabled: extrasControl.currentText !== "Normal"
                         onClicked: openConfig(extrasControl.currentText)
                         background: Rectangle {
                             color: parent.enabled ? (parent.down ? "#d4365b" : (parent.hovered ? "#e9456c" : "#d4365b")) : "#ffffff"

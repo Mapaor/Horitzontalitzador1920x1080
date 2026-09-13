@@ -86,6 +86,7 @@ Popup {
                 leftPadding: parent.indicator.width + parent.spacing
             }
             indicator: Rectangle {
+                y: parent.height / 2 - height / 2
                 implicitWidth: 18
                 implicitHeight: 18
                 radius: 4

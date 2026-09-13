@@ -10,7 +10,7 @@ Popup {
     property string frameColor: "#000000"
     
     width: 300
-    height: 260
+    height: 300
     anchors.centerIn: Overlay.overlay
     modal: true
     focus: true
@@ -78,8 +78,6 @@ Popup {
                     implicitHeight: 16
                     radius: 8
                     color: frameWidthSlider.pressed ? "#be2649" : "#d4365b"
-                    border.color: "#000000"
-                    border.width: 2
                 }
             }
         }
