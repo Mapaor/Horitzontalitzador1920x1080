@@ -14,6 +14,9 @@ def build_ffmpeg_command(
     enable_overlay_recolor,
     overlay_color,
     is_preview=False,
+    animated_bg_path="",
+    animated_bg_is_long=False,
+    animated_bg_is_loop=False,
 ):
     if mode == "Zoom":
         background = (
@@ -33,10 +36,34 @@ def build_ffmpeg_command(
             f"[blurred]"
         )
 
+    cmd = [
+        str(ffmpeg_path),
+        "-y",
+        "-i",
+        input_path,
+    ]
+
+    input_idx = 1
+    overlay_idx = -1
+    animated_bg_idx = -1
+
     if overlay_path:
-        overlay_output = "[tmp]"
-    else:
-        overlay_output = ""
+        cmd.extend([
+            "-i",
+            overlay_path,
+        ])
+        overlay_idx = input_idx
+        input_idx += 1
+        
+    if animated_bg_path:
+        if not animated_bg_is_long and animated_bg_is_loop:
+            cmd.extend(["-stream_loop", "-1"])
+        cmd.extend([
+            "-i",
+            animated_bg_path
+        ])
+        animated_bg_idx = input_idx
+        input_idx += 1
 
     if enable_frame:
         ffmpeg_color = frame_color.replace("#", "0x")
@@ -47,54 +74,53 @@ def build_ffmpeg_command(
             f"pad=iw+{fw2}:ih+{fw2}:{frame_width}:{frame_width}:{ffmpeg_color}"
             f"[foreground]"
         )
-        overlay = (
-            "[blurred]"
-            "[foreground]"
-            f"overlay=(W-w)/2:(H-h)/2{overlay_output}"
-        )
     else:
         foreground = (
             f"[orig]"
             f"scale=-2:{OUTPUT_HEIGHT}"
             f"[foreground]"
         )
-        overlay = (
-            "[blurred]"
-            "[foreground]"
-            f"overlay=(W-w)/2:0{overlay_output}"
-        )
 
     filters = [
         "split[orig][bg]",
         background,
         foreground,
-        overlay,
     ]
+
+    comp_out = "[comp1]" if (overlay_path or animated_bg_path) else ""
+    if enable_frame:
+        filters.append(
+            "[blurred]"
+            "[foreground]"
+            f"overlay=(W-w)/2:(H-h)/2{comp_out}"
+        )
+    else:
+        filters.append(
+            "[blurred]"
+            "[foreground]"
+            f"overlay=(W-w)/2:0{comp_out}"
+        )
+
+    current_comp = "[comp1]"
+    next_comp_idx = 2
+
+    if animated_bg_path:
+        next_comp = f"[comp{next_comp_idx}]" if overlay_path else ""
+        filters.append(f"{current_comp}[{animated_bg_idx}:v]overlay=shortest=1{next_comp}")
+        current_comp = next_comp
+        next_comp_idx += 1
 
     if overlay_path:
         if enable_overlay_recolor:
             ffmpeg_recolor = overlay_color.replace("#", "0x")
             filters.append(f"color=c={ffmpeg_recolor}:s={OUTPUT_WIDTH}x{OUTPUT_HEIGHT}:d=1[color_bg]")
-            filters.append("[1:v]alphaextract[alpha]")
-            filters.append("[color_bg][alpha]alphamerge[colored_overlay]")
-            filters.append("[tmp][colored_overlay]overlay=0:0")
+            filters.append(f"[{overlay_idx}:v]alphaextract[alpha]")
+            filters.append(f"[color_bg][alpha]alphamerge[colored_overlay]")
+            filters.append(f"{current_comp}[colored_overlay]overlay=0:0")
         else:
-            filters.append("[tmp][1:v]overlay=0:0")
+            filters.append(f"{current_comp}[{overlay_idx}:v]overlay=0:0")
 
     filter_complex_str = ";".join(filters)
-
-    cmd = [
-        str(ffmpeg_path),
-        "-y",
-        "-i",
-        input_path,
-    ]
-
-    if overlay_path:
-        cmd.extend([
-            "-i",
-            overlay_path,
-        ])
 
     cmd.extend([
         "-filter_complex",

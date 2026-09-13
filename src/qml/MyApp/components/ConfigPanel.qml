@@ -39,6 +39,7 @@ Rectangle {
             ColumnLayout {
                 spacing: 8
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Text {
                     text: "Nivell de Blur: " + blurControl.value
                     color: "#969798"
@@ -84,6 +85,7 @@ Rectangle {
             ColumnLayout {
                 spacing: 8
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Text {
                     text: "Foscor (Darkness): " + darknessControl.value + "%"
                     color: "#969798"
@@ -125,15 +127,11 @@ Rectangle {
                     }
                 }
             }
-        }
-
-        RowLayout {
-            spacing: 30
-            Layout.fillWidth: true
 
             ColumnLayout {
                 spacing: 8
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Text {
                     text: "Mode de Fons"
                     color: "#969798"
@@ -146,6 +144,11 @@ Rectangle {
                     currentIndex: 0
                 }
             }
+        }
+
+        RowLayout {
+            spacing: 30
+            Layout.fillWidth: true
 
             ColumnLayout {
                 spacing: 8
@@ -161,7 +164,7 @@ Rectangle {
                     SegmentedControl {
                         id: extrasControl
                         Layout.fillWidth: true
-                        model: ["Cap", "Marc", "Overlay"]
+                        model: ["Cap", "Marc", "Overlay", "Fons animat"]
                         currentIndex: 0
                     }
                     Button {

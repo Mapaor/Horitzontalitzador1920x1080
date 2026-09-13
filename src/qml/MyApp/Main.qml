@@ -71,6 +71,8 @@ Window {
                     appPopups.openFramePopup();
                 else if (extra === "Overlay")
                     appPopups.openOverlayPopup();
+                else if (extra === "Fons animat")
+                    appPopups.openAnimatedBgPopup(mainWindow.videoPath);
             }
         }
 
@@ -96,14 +98,14 @@ Window {
             onPreviewClicked: {
                 footerPanel.setStatus("Generant previsualització...", "white");
                 mainWindow.isPreviewing = true;
-                videoConverter.preview(mainWindow.videoPath, mainWindow.blurValue, mainWindow.darknessValue, mainWindow.modeText, mainWindow.extraText === "Marc", mainWindow.frameColor, mainWindow.frameWidth, mainWindow.extraText === "Overlay" ? mainWindow.overlayPath : "", mainWindow.enableOverlayRecolor, mainWindow.overlayColor);
+                videoConverter.preview(mainWindow.videoPath, mainWindow.blurValue, mainWindow.darknessValue, mainWindow.modeText, mainWindow.extraText === "Marc", mainWindow.frameColor, mainWindow.frameWidth, mainWindow.extraText === "Overlay" ? mainWindow.overlayPath : "", mainWindow.enableOverlayRecolor, mainWindow.overlayColor, mainWindow.extraText === "Fons animat" ? appPopups.animatedBgPath : "", appPopups.animatedBgStatus.is_long === true, appPopups.animatedBgStatus.loop_ok === true);
             }
 
             onConvertClicked: {
                 footerPanel.setStatus("Convertint...", "white");
                 mainWindow.isConverting = true;
                 footerPanel.setProgress(0);
-                videoConverter.convert(mainWindow.videoPath, mainWindow.outputDir, mainWindow.outputName, mainWindow.blurValue, mainWindow.darknessValue, mainWindow.modeText, mainWindow.extraText === "Marc", mainWindow.frameColor, mainWindow.frameWidth, mainWindow.extraText === "Overlay" ? mainWindow.overlayPath : "", mainWindow.enableOverlayRecolor, mainWindow.overlayColor);
+                videoConverter.convert(mainWindow.videoPath, mainWindow.outputDir, mainWindow.outputName, mainWindow.blurValue, mainWindow.darknessValue, mainWindow.modeText, mainWindow.extraText === "Marc", mainWindow.frameColor, mainWindow.frameWidth, mainWindow.extraText === "Overlay" ? mainWindow.overlayPath : "", mainWindow.enableOverlayRecolor, mainWindow.overlayColor, mainWindow.extraText === "Fons animat" ? appPopups.animatedBgPath : "", appPopups.animatedBgStatus.is_long === true, appPopups.animatedBgStatus.loop_ok === true);
             }
         }
 

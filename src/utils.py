@@ -1,8 +1,9 @@
 import os
 import subprocess
 import json
+import tempfile
 
-from ffmpeg_runtime import get_ffprobe_path
+from ffmpeg_runtime import get_ffprobe_path, get_ffmpeg_path
 
 def get_video_info(input_path: str) -> str:
     cmd = [
@@ -112,3 +113,122 @@ def get_dimensions(input_path):
         return int(width_str), int(height_str)
     except Exception:
         raise RuntimeError("Error a l'obtenir les dimensions del vídeo.")
+
+def validate_animated_background(bg_path: str, input_duration: float) -> dict:
+    result = {
+        "format_ok": False,
+        "format_msg": "",
+        "loop_ok": False,
+        "loop_msg": "",
+        "duration_msg": "",
+        "can_proceed": False
+    }
+
+    # 1. Check format (MOV, 1920x1080, Alpha)
+    cmd = [
+        str(get_ffprobe_path()),
+        "-v", "error",
+        "-select_streams", "v:0",
+        "-show_entries", "format=format_name:stream=width,height,pix_fmt",
+        "-of", "json",
+        bg_path
+    ]
+    flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+    try:
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=flags)
+        if proc.returncode != 0:
+            result["format_msg"] = "Error llegint format"
+            return result
+        
+        data = json.loads(proc.stdout)
+        fmt_name = data.get("format", {}).get("format_name", "").lower()
+        stream = data.get("streams", [{}])[0]
+        width = stream.get("width", 0)
+        height = stream.get("height", 0)
+        pix_fmt = stream.get("pix_fmt", "").lower()
+
+        is_mov = "mov" in fmt_name or "quicktime" in fmt_name or "mp4" in fmt_name
+        is_1080p = (width == 1920 and height == 1080)
+        has_alpha = "a" in pix_fmt or "yuva" in pix_fmt or "rgba" in pix_fmt or "argb" in pix_fmt or "bgra" in pix_fmt
+
+        fmt_ext = ".MOV" if is_mov else ".MP4/MOV"
+        res_str = f"{width}x{height}" if (width and height) else "?x?"
+        alpha_str = "RGBA" if has_alpha else "RGB"
+
+        color_green = "#10b981"
+        color_red = "#ef4444"
+
+        fmt_color = color_green if is_mov else color_red
+        res_color = color_green if is_1080p else color_red
+        alpha_color = color_green if has_alpha else color_red
+
+        result["format_msg"] = f"<font color='{fmt_color}'>{fmt_ext}</font> <font color='#969798'>·</font> <font color='{res_color}'>{res_str}</font> <font color='#969798'>·</font> <font color='{alpha_color}'>{alpha_str}</font>"
+        result["format_ok"] = is_mov and is_1080p and has_alpha
+    except Exception as e:
+        result["format_msg"] = f"<font color='#ef4444'>Error: {e}</font>"
+        return result
+
+    # 2. Check duration
+    try:
+        bg_duration = get_duration(bg_path)
+    except Exception:
+        result["duration_msg"] = "DURACIÓ DESCONEGUDA"
+        return result
+
+    def fmt_time(seconds):
+        m, s = divmod(int(seconds), 60)
+        return f"{m}:{s:02d}"
+
+    result["duration_msg"] = f"DURACIÓ {fmt_time(bg_duration)} (Duració input {fmt_time(input_duration)})"
+    
+    # 3. Check loop always
+    is_long = bg_duration >= input_duration
+    result["is_long"] = is_long
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        first_frame_path = os.path.join(tmpdir, "first.png")
+        last_frame_path = os.path.join(tmpdir, "last.png")
+
+        # Extract first frame
+        subprocess.run([
+            str(get_ffmpeg_path()), "-v", "error", "-i", bg_path,
+            "-vframes", "1", first_frame_path
+        ], creationflags=flags)
+
+        # Extract last frame (seek 1 second from end to be safe, override updates until EOF)
+        subprocess.run([
+            str(get_ffmpeg_path()), "-v", "error", "-sseof", "-1", "-i", bg_path,
+            "-update", "1", "-q:v", "1", last_frame_path
+        ], creationflags=flags)
+
+        if os.path.exists(first_frame_path) and os.path.exists(last_frame_path):
+            ssim_cmd = [
+                str(get_ffmpeg_path()),
+                "-i", first_frame_path, "-i", last_frame_path,
+                "-lavfi", "ssim", "-f", "null", "-"
+            ]
+            ssim_proc = subprocess.run(ssim_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=flags)
+            
+            output = ssim_proc.stderr
+            all_ssim = 0.0
+            for line in output.split('\n'):
+                if "All:" in line:
+                    try:
+                        part = line.split("All:")[1].split()[0]
+                        all_ssim = float(part)
+                    except Exception:
+                        pass
+                    break
+            
+            if all_ssim >= 0.95:
+                result["loop_ok"] = True
+                result["loop_msg"] = f"LOOP OK ({all_ssim:.3f})"
+            else:
+                result["loop_ok"] = False
+                result["loop_msg"] = f"NO LOOP ({all_ssim:.3f})"
+        else:
+            result["loop_ok"] = False
+            result["loop_msg"] = "ERROR LOOP"
+
+    result["can_proceed"] = result["format_ok"] and (result["loop_ok"] or result["is_long"])
+    return result

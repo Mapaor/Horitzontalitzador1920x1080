@@ -2,13 +2,14 @@ import os
 import subprocess
 import threading
 import tempfile
+import sys
 from urllib.parse import unquote
 # pyrefly: ignore [missing-import]
 from PySide6.QtCore import QObject, Slot, Signal
 
 from ffmpeg_runtime import get_ffmpeg_path
 from settings import ALLOWED_DIMENSIONS
-from utils import get_dimensions, get_duration, get_output_path
+from utils import get_dimensions, get_duration, get_output_path, validate_animated_background
 from command_builder import build_ffmpeg_command
 
 def _clean_path(path: str) -> str:
@@ -25,6 +26,7 @@ class VideoConverter(QObject):
     
     previewFinished = Signal(bool, str, str) # success, message, image_path
     videoInfoLoaded = Signal(str, str) # videoPath, info_string
+    animatedBgCheckFinished = Signal(str) # json_string
 
     @Slot(str, result=str)
     def get_video_info(self, input_path: str) -> str:
@@ -34,7 +36,7 @@ class VideoConverter(QObject):
         from utils import get_video_info as _get_info
         return _get_info(input_path)
 
-    @Slot(str, str, str, int, float, str, bool, str, int, str, bool, str)
+    @Slot(str, str, str, int, float, str, bool, str, int, str, bool, str, str, bool, bool)
     def convert(
         self,
         input_path: str,
@@ -48,11 +50,15 @@ class VideoConverter(QObject):
         frame_width: int,
         overlay_path: str,
         enable_overlay_recolor: bool,
-        overlay_color: str
+        overlay_color: str,
+        animated_bg_path: str,
+        animated_bg_is_long: bool,
+        animated_bg_is_loop: bool
     ):
         input_path = _clean_path(input_path)
         output_dir = _clean_path(output_dir)
         overlay_path = _clean_path(overlay_path)
+        animated_bg_path = _clean_path(animated_bg_path)
 
         self.conversionStarted.emit()
         threading.Thread(
@@ -60,7 +66,8 @@ class VideoConverter(QObject):
             args=(
                 input_path, output_dir, output_name, blur, darkness, mode,
                 enable_frame, frame_color, frame_width,
-                overlay_path, enable_overlay_recolor, overlay_color
+                overlay_path, enable_overlay_recolor, overlay_color,
+                animated_bg_path, animated_bg_is_long, animated_bg_is_loop
             ),
             daemon=True
         ).start()
@@ -69,7 +76,8 @@ class VideoConverter(QObject):
         self,
         input_path, output_dir, output_name, blur, darkness, mode,
         enable_frame, frame_color, frame_width,
-        overlay_path, enable_overlay_recolor, overlay_color
+        overlay_path, enable_overlay_recolor, overlay_color,
+        animated_bg_path, animated_bg_is_long, animated_bg_is_loop
     ):
         try:
             width, height = get_dimensions(input_path)
@@ -92,6 +100,9 @@ class VideoConverter(QObject):
                 overlay_path,
                 enable_overlay_recolor,
                 overlay_color,
+                animated_bg_path=animated_bg_path,
+                animated_bg_is_long=animated_bg_is_long,
+                animated_bg_is_loop=animated_bg_is_loop
             )
 
             # Inject progress flags before the output path (last element)
@@ -103,11 +114,12 @@ class VideoConverter(QObject):
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT,
                 text=True,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
 
+            error_log = []
             for line in process.stdout:
                 line = line.strip()
                 if line.startswith("out_time_us="):
@@ -120,11 +132,15 @@ class VideoConverter(QObject):
                         pass
                 elif line == "progress=end":
                     self.progressUpdated.emit(1.0)
+                else:
+                    error_log.append(line)
 
             process.wait()
 
             if process.returncode != 0:
-                raise RuntimeError("FFmpeg ha retornat un error.")
+                err_text = "\n".join(error_log[-20:]) # Keep last 20 lines of log
+                print(f"FFmpeg Convert Error:\n{err_text}")
+                raise RuntimeError(f"FFmpeg error:\n{err_text}")
 
             self.conversionFinished.emit(True, f"Vídeo desat a: {output_path}")
 
@@ -132,7 +148,7 @@ class VideoConverter(QObject):
             self.conversionFinished.emit(False, str(e))
 
 
-    @Slot(str, int, float, str, bool, str, int, str, bool, str)
+    @Slot(str, int, float, str, bool, str, int, str, bool, str, str, bool, bool)
     def preview(
         self,
         input_path: str,
@@ -144,17 +160,22 @@ class VideoConverter(QObject):
         frame_width: int,
         overlay_path: str,
         enable_overlay_recolor: bool,
-        overlay_color: str
+        overlay_color: str,
+        animated_bg_path: str,
+        animated_bg_is_long: bool,
+        animated_bg_is_loop: bool
     ):
         input_path = _clean_path(input_path)
         overlay_path = _clean_path(overlay_path)
+        animated_bg_path = _clean_path(animated_bg_path)
 
         threading.Thread(
             target=self._preview_thread,
             args=(
                 input_path, blur, darkness, mode,
                 enable_frame, frame_color, frame_width,
-                overlay_path, enable_overlay_recolor, overlay_color
+                overlay_path, enable_overlay_recolor, overlay_color,
+                animated_bg_path, animated_bg_is_long, animated_bg_is_loop
             ),
             daemon=True
         ).start()
@@ -163,7 +184,8 @@ class VideoConverter(QObject):
         self,
         input_path, blur, darkness, mode,
         enable_frame, frame_color, frame_width,
-        overlay_path, enable_overlay_recolor, overlay_color
+        overlay_path, enable_overlay_recolor, overlay_color,
+        animated_bg_path, animated_bg_is_long, animated_bg_is_loop
     ):
         try:
             width, height = get_dimensions(input_path)
@@ -187,6 +209,9 @@ class VideoConverter(QObject):
                 enable_overlay_recolor,
                 overlay_color,
                 is_preview=True,
+                animated_bg_path=animated_bg_path,
+                animated_bg_is_long=animated_bg_is_long,
+                animated_bg_is_loop=animated_bg_is_loop
             )
 
             process = subprocess.Popen(
@@ -197,12 +222,57 @@ class VideoConverter(QObject):
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
 
-            process.communicate()
+            out, err = process.communicate()
 
             if process.returncode != 0:
-                raise RuntimeError("FFmpeg ha retornat un error en previsualitzar.")
+                print(f"FFmpeg Preview Error:\n{err}")
+                raise RuntimeError(f"FFmpeg error:\n{err}")
 
             self.previewFinished.emit(True, "Previsualització generada.", f"file:///{output_path.replace(os.sep, '/')}")
 
         except Exception as e:
             self.previewFinished.emit(False, str(e), "")
+
+    @Slot(str)
+    def open_and_select_file(self, file_path: str):
+        file_path = _clean_path(file_path)
+        if not os.path.exists(file_path):
+            return
+            
+        try:
+            if sys.platform == 'win32':
+                subprocess.Popen(['explorer', '/select,', os.path.normpath(file_path)])
+            elif sys.platform == 'darwin':
+                subprocess.Popen(['open', '-R', file_path])
+            else:
+                subprocess.Popen(['xdg-open', os.path.dirname(file_path)])
+        except Exception as e:
+            print(f"Error opening file: {e}")
+
+    @Slot(str, str)
+    def check_animated_bg_async(self, bg_path: str, input_path: str):
+        bg_path = _clean_path(bg_path)
+        input_path = _clean_path(input_path)
+        
+        if not bg_path:
+            self.animatedBgCheckFinished.emit("{}")
+            return
+            
+        threading.Thread(
+            target=self._check_animated_bg_thread,
+            args=(bg_path, input_path),
+            daemon=True
+        ).start()
+
+    def _check_animated_bg_thread(self, bg_path, input_path):
+        import json
+        try:
+            input_duration = 0.0
+            if input_path and os.path.exists(input_path):
+                from utils import get_duration
+                input_duration = get_duration(input_path)
+                
+            res = validate_animated_background(bg_path, input_duration)
+            self.animatedBgCheckFinished.emit(json.dumps(res))
+        except Exception as e:
+            self.animatedBgCheckFinished.emit(json.dumps({"error": str(e)}))
