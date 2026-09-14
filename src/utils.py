@@ -44,19 +44,34 @@ def get_video_info(input_path: str) -> str:
     except Exception:
         return "Propietats no disponibles"
 
-def get_output_path(input_path, output_dir=None, output_name=None):
+EXTENSIONS = {
+    "MP4 • H.264": ".mp4",
+    "MOV • H.264": ".mov",
+    "MOV • ProRes 422": ".mov",
+    "AVI • AVC-Intra 100": ".avi",
+    "MXF • AVC-Intra 100": ".mxf",
+    "MXF • DNxHR HQ": ".mxf"
+}
+
+def get_output_path(input_path, output_dir=None, output_name=None, codec_format="MP4 • H.264"):
     if output_dir:
         directory = output_dir
     else:
         directory = os.path.dirname(input_path)
         
     filename = os.path.basename(input_path)
-    original_name, extension = os.path.splitext(filename)
+    original_name, original_ext = os.path.splitext(filename)
     
     if output_name:
-        name = output_name
+        name_part, ext_part = os.path.splitext(output_name)
+        if ext_part:
+            return os.path.normpath(os.path.join(directory, output_name))
+        else:
+            name = output_name
     else:
         name = f"{original_name}_16x9"
+        
+    extension = EXTENSIONS.get(codec_format, ".mp4")
         
     return os.path.normpath(os.path.join(
         directory,

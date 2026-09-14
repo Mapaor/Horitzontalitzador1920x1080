@@ -15,6 +15,7 @@ Rectangle {
     property alias outputName: nameEntry.text
     property string outputDir: ""
     property alias currentStatusText: statusText.text
+    property string currentFormat: formatCombo.currentText
 
     signal previewClicked
     signal convertClicked
@@ -56,6 +57,7 @@ Rectangle {
                 color: "#969798"
             }
             Button {
+                HoverHandler { cursorShape: Qt.PointingHandCursor }
                 text: "Canviar..."
                 onClicked: outputDialog.open()
                 background: Rectangle {
@@ -78,6 +80,11 @@ Rectangle {
                 color: "#000000"
                 Layout.fillWidth: true
                 elide: Text.ElideMiddle
+            }
+
+            CodecSelector {
+                id: formatCombo
+                Layout.preferredHeight: nameEntry.height
             }
 
             Text {
@@ -116,7 +123,7 @@ Rectangle {
 
                     Text {
                         id: statusText
-                        text: "Llest per generar"
+                        text: "Llest per convertir"
                         color: "#969798"
                         font.pixelSize: 13
                         elide: Text.ElideRight
@@ -127,8 +134,16 @@ Rectangle {
                         SequentialAnimation on opacity {
                             running: statusText.text.indexOf("Preparant") !== -1
                             loops: Animation.Infinite
-                            NumberAnimation { to: 0.3; duration: 800; easing.type: Easing.InOutSine }
-                            NumberAnimation { to: 1.0; duration: 800; easing.type: Easing.InOutSine }
+                            NumberAnimation {
+                                to: 0.3
+                                duration: 800
+                                easing.type: Easing.InOutSine
+                            }
+                            NumberAnimation {
+                                to: 1.0
+                                duration: 800
+                                easing.type: Easing.InOutSine
+                            }
                         }
 
                         onTextChanged: {
@@ -138,6 +153,7 @@ Rectangle {
                         }
                     }
                     Button {
+                        HoverHandler { cursorShape: Qt.PointingHandCursor }
                         id: openFolderBtn
                         visible: statusText.text.indexOf("Vídeo desat a:") !== -1
                         anchors.left: statusText.right
@@ -195,8 +211,10 @@ Rectangle {
 
             RowLayout {
                 spacing: 10
-                
+
                 Button {
+
+                    HoverHandler { cursorShape: Qt.PointingHandCursor }
                     text: "Previsualitzar"
                     enabled: canConvert
                     onClicked: previewClicked()
@@ -219,7 +237,9 @@ Rectangle {
                 }
 
                 Button {
-                    text: "Generar"
+
+                    HoverHandler { cursorShape: Qt.PointingHandCursor }
+                    text: "Convertir"
                     enabled: canConvert
                     onClicked: convertClicked()
                     Layout.preferredHeight: 45

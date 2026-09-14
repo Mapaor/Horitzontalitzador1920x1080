@@ -36,7 +36,7 @@ class VideoConverter(QObject):
         from utils import get_video_info as _get_info
         return _get_info(input_path)
 
-    @Slot(str, str, str, int, float, str, bool, str, int, str, bool, str, str, bool, bool)
+    @Slot(str, str, str, int, float, str, bool, str, int, str, bool, str, str, bool, bool, str)
     def convert(
         self,
         input_path: str,
@@ -53,7 +53,8 @@ class VideoConverter(QObject):
         overlay_color: str,
         animated_bg_path: str,
         animated_bg_is_long: bool,
-        animated_bg_is_loop: bool
+        animated_bg_is_loop: bool,
+        codec_format: str
     ):
         input_path = _clean_path(input_path)
         output_dir = _clean_path(output_dir)
@@ -67,7 +68,7 @@ class VideoConverter(QObject):
                 input_path, output_dir, output_name, blur, darkness, mode,
                 enable_frame, frame_color, frame_width,
                 overlay_path, enable_overlay_recolor, overlay_color,
-                animated_bg_path, animated_bg_is_long, animated_bg_is_loop
+                animated_bg_path, animated_bg_is_long, animated_bg_is_loop, codec_format
             ),
             daemon=True
         ).start()
@@ -77,7 +78,7 @@ class VideoConverter(QObject):
         input_path, output_dir, output_name, blur, darkness, mode,
         enable_frame, frame_color, frame_width,
         overlay_path, enable_overlay_recolor, overlay_color,
-        animated_bg_path, animated_bg_is_long, animated_bg_is_loop
+        animated_bg_path, animated_bg_is_long, animated_bg_is_loop, codec_format
     ):
         try:
             width, height = get_dimensions(input_path)
@@ -85,7 +86,7 @@ class VideoConverter(QObject):
                 raise ValueError(f"Dimensions no vàlides: {width}x{height}. Només es permet: {ALLOWED_DIMENSIONS}")
 
             duration = get_duration(input_path)
-            output_path = get_output_path(input_path, output_dir, output_name)
+            output_path = get_output_path(input_path, output_dir, output_name, codec_format)
 
             cmd = build_ffmpeg_command(
                 get_ffmpeg_path(),
@@ -102,7 +103,8 @@ class VideoConverter(QObject):
                 overlay_color,
                 animated_bg_path=animated_bg_path,
                 animated_bg_is_long=animated_bg_is_long,
-                animated_bg_is_loop=animated_bg_is_loop
+                animated_bg_is_loop=animated_bg_is_loop,
+                codec_format=codec_format
             )
 
             # Inject progress flags before the output path (last element)
@@ -120,14 +122,19 @@ class VideoConverter(QObject):
             )
 
             error_log = []
+            max_percent = 0.0
             for line in process.stdout:
                 line = line.strip()
                 if line.startswith("out_time_us="):
                     try:
-                        out_time_us = int(line.split("=", 1)[1])
-                        if duration > 0:
-                            percent = min(out_time_us / (duration * 1_000_000), 1.0)
-                            self.progressUpdated.emit(percent)
+                        val = line.split("=", 1)[1]
+                        if val.lstrip('-').isdigit():
+                            out_time_us = int(val)
+                            if duration > 0:
+                                percent = min(max(out_time_us / (duration * 1_000_000), 0.0), 1.0)
+                                if percent > max_percent:
+                                    max_percent = percent
+                                    self.progressUpdated.emit(percent)
                     except ValueError:
                         pass
                 elif line == "progress=end":
@@ -148,7 +155,7 @@ class VideoConverter(QObject):
             self.conversionFinished.emit(False, str(e))
 
 
-    @Slot(str, int, float, str, bool, str, int, str, bool, str, str, bool, bool)
+    @Slot(str, int, float, str, bool, str, int, str, bool, str, str, bool, bool, str)
     def preview(
         self,
         input_path: str,
@@ -163,7 +170,8 @@ class VideoConverter(QObject):
         overlay_color: str,
         animated_bg_path: str,
         animated_bg_is_long: bool,
-        animated_bg_is_loop: bool
+        animated_bg_is_loop: bool,
+        codec_format: str
     ):
         input_path = _clean_path(input_path)
         overlay_path = _clean_path(overlay_path)
@@ -175,7 +183,7 @@ class VideoConverter(QObject):
                 input_path, blur, darkness, mode,
                 enable_frame, frame_color, frame_width,
                 overlay_path, enable_overlay_recolor, overlay_color,
-                animated_bg_path, animated_bg_is_long, animated_bg_is_loop
+                animated_bg_path, animated_bg_is_long, animated_bg_is_loop, codec_format
             ),
             daemon=True
         ).start()
@@ -185,7 +193,7 @@ class VideoConverter(QObject):
         input_path, blur, darkness, mode,
         enable_frame, frame_color, frame_width,
         overlay_path, enable_overlay_recolor, overlay_color,
-        animated_bg_path, animated_bg_is_long, animated_bg_is_loop
+        animated_bg_path, animated_bg_is_long, animated_bg_is_loop, codec_format
     ):
         try:
             width, height = get_dimensions(input_path)
@@ -211,7 +219,8 @@ class VideoConverter(QObject):
                 is_preview=True,
                 animated_bg_path=animated_bg_path,
                 animated_bg_is_long=animated_bg_is_long,
-                animated_bg_is_loop=animated_bg_is_loop
+                animated_bg_is_loop=animated_bg_is_loop,
+                codec_format=codec_format
             )
 
             process = subprocess.Popen(

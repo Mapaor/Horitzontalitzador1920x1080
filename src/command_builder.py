@@ -17,6 +17,7 @@ def build_ffmpeg_command(
     animated_bg_path="",
     animated_bg_is_long=False,
     animated_bg_is_loop=False,
+    codec_format="MP4 • H.264",
 ):
     if mode == "Zoom":
         background = (
@@ -134,14 +135,49 @@ def build_ffmpeg_command(
             output_path
         ])
     else:
-        cmd.extend([
-            "-c:v",
-            "libx264",
-            "-crf",
-            str(DEFAULT_CRF),
-            "-c:a",
-            "aac",
-            output_path,
-        ])
+        if codec_format in ["MP4 • H.264", "MOV • H.264"]:
+            cmd.extend([
+                "-c:v", "libx264",
+                "-crf", str(DEFAULT_CRF),
+                "-pix_fmt", "yuv420p",
+                "-c:a", "aac"
+            ])
+        elif codec_format == "MOV • ProRes 422":
+            cmd.extend([
+                "-c:v", "prores_ks",
+                "-profile:v", "2",
+                "-pix_fmt", "yuv422p10le",
+                "-c:a", "pcm_s16le",
+                "-ar", "48000"
+            ])
+        elif codec_format in ["AVI • AVC-Intra 100", "MXF • AVC-Intra 100"]:
+            cmd.extend([
+                "-c:v", "libx264",
+                "-avcintra-class", "100",
+                "-pix_fmt", "yuv422p10le",
+                "-color_primaries", "bt709",
+                "-color_trc", "bt709",
+                "-colorspace", "bt709",
+                "-c:a", "pcm_s16le",
+                "-ar", "48000"
+            ])
+        elif codec_format == "MXF • DNxHR HQ":
+            cmd.extend([
+                "-c:v", "dnxhd",
+                "-profile:v", "dnxhr_hq",
+                "-pix_fmt", "yuv422p",
+                "-c:a", "pcm_s16le",
+                "-ar", "48000"
+            ])
+        else:
+            # Fallback
+            cmd.extend([
+                "-c:v", "libx264",
+                "-crf", str(DEFAULT_CRF),
+                "-pix_fmt", "yuv420p",
+                "-c:a", "aac"
+            ])
+            
+        cmd.append(output_path)
 
     return cmd
