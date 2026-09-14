@@ -47,7 +47,7 @@ Popup {
                 text: "Gruix del marc: " + Math.round(frameWidthSlider.value) + "px"
                 color: "#000000"
             }
-            Slider {
+            Slider { HoverHandler { cursorShape: Qt.PointingHandCursor }
                 id: frameWidthSlider
                 Layout.fillWidth: true
                 from: 2
@@ -96,6 +96,7 @@ Popup {
                 border.width: 2
                 radius: 4
                 MouseArea {
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     onClicked: frameColorDialog.open()
                 }
@@ -107,6 +108,8 @@ Popup {
         }
 
         Button {
+
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
             text: "Tancar"
             Layout.alignment: Qt.AlignHCenter
             onClicked: framePopup.close()

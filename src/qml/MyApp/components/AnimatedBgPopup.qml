@@ -59,6 +59,8 @@ Popup {
         }
 
         Button {
+
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
             text: animatedBgPopup.animatedBgPath === "" ? "Seleccionar Vídeo Fons" : "Canviar vídeo"
             Layout.fillWidth: true
             onClicked: animatedBgDialog.open()
@@ -139,6 +141,8 @@ Popup {
             spacing: 15
 
             Button {
+
+                HoverHandler { cursorShape: Qt.PointingHandCursor }
                 text: "Tancar"
                 onClicked: animatedBgPopup.close()
                 background: Rectangle {
@@ -157,6 +161,8 @@ Popup {
             }
 
             Button {
+
+                HoverHandler { cursorShape: Qt.PointingHandCursor }
                 text: "Aplicar"
                 enabled: animatedBgPopup.animatedBgIsValid && !animatedBgPopup.isAnalyzing
                 onClicked: animatedBgPopup.close()

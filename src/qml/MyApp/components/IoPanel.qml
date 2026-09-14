@@ -76,6 +76,8 @@ Rectangle {
                 visible: videoPath === ""
 
                 Button {
+
+                    HoverHandler { cursorShape: Qt.PointingHandCursor }
                     icon.source: "../assets/inbox.svg"
                     icon.color: parent.parent.containsDrag ? "#d4365b" : "#e9456c"
                     icon.width: 24
@@ -89,6 +91,8 @@ Rectangle {
                 }
 
                 Button {
+
+                    HoverHandler { cursorShape: Qt.PointingHandCursor }
                     text: "o seleccionar fitxer..."
                     Layout.alignment: Qt.AlignHCenter
                     onClicked: inputDialog.open()
@@ -126,6 +130,8 @@ Rectangle {
                 }
 
                 Button {
+
+                    HoverHandler { cursorShape: Qt.PointingHandCursor }
                     text: "Canviar vídeo..."
                     Layout.alignment: Qt.AlignVCenter
                     onClicked: inputDialog.open()

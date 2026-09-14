@@ -50,6 +50,8 @@ Popup {
         }
 
         Button {
+
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
             text: "Seleccionar Imatge Overlay"
             Layout.fillWidth: true
             onClicked: overlayImgDialog.open()
@@ -118,6 +120,7 @@ Popup {
                 border.width: 2
                 radius: 4
                 MouseArea {
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     onClicked: {
                         if (overlayPopup.enableOverlayRecolor)
@@ -132,6 +135,8 @@ Popup {
         }
 
         Button {
+
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
             text: "Tancar"
             Layout.alignment: Qt.AlignHCenter
             onClicked: overlayPopup.close()

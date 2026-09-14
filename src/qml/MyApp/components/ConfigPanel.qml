@@ -45,7 +45,7 @@ Rectangle {
                     color: "#969798"
                     font.pixelSize: 12
                 }
-                Slider {
+                Slider { HoverHandler { cursorShape: Qt.PointingHandCursor }
                     id: blurControl
                     Layout.fillWidth: true
                     from: 0
@@ -91,7 +91,7 @@ Rectangle {
                     color: "#969798"
                     font.pixelSize: 12
                 }
-                Slider {
+                Slider { HoverHandler { cursorShape: Qt.PointingHandCursor }
                     id: darknessControl
                     Layout.fillWidth: true
                     from: 0
@@ -168,6 +168,7 @@ Rectangle {
                         currentIndex: 0
                     }
                     Button {
+                        HoverHandler { cursorShape: Qt.PointingHandCursor }
                         icon.source: "../assets/config.svg"
                         icon.color: enabled ? "#ffffff" : "#969798"
                         icon.width: 18

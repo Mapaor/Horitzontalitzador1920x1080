@@ -30,6 +30,8 @@ Popup {
         }
         
         Button {
+        
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
             text: "Tancar"
             Layout.alignment: Qt.AlignHCenter
             onClicked: previewPopup.close()

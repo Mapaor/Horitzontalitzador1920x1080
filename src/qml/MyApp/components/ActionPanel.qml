@@ -11,6 +11,8 @@ RowLayout {
     signal convertClicked()
 
     Button {
+
+        HoverHandler { cursorShape: Qt.PointingHandCursor }
         text: "Previsualitzar"
         enabled: canConvert
         onClicked: previewClicked()
@@ -33,6 +35,8 @@ RowLayout {
     }
     
     Button {
+    
+        HoverHandler { cursorShape: Qt.PointingHandCursor }
         text: "Convertir"
         enabled: canConvert
         onClicked: convertClicked()
